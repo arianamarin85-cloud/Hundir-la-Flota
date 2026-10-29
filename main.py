@@ -1,1 +1,19 @@
-import Prueba_hlf.funciones as f
+import numpy as np
+import funciones as f
+import variable as v
+
+# Creamos los 4 tableros del juego
+t_barco_rival = f.crear_tablero()
+t_barco_jugador = f.crear_tablero()
+t_disparos_rival = f.crear_tablero()
+t_disparos_jugador = f.crear_tablero()
+
+#Colocamos los barcos en los tableros
+t_barco_jugador = f.colocar_barcos(t_barco_jugador)
+t_barco_rival = f.colocar_barcos(t_barco_rival)
+
+#Mostramos el tablero del jugador
+print("--- TABLERO JUGADOR ---")
+print(t_barco_jugador)
+ 
+print(f.crear_turno())  
