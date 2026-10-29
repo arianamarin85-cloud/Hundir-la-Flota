@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo - Hundir la Flota</title>
+  <style>
+    :root {
+      --bg: #0b132b;
+      --card-bg: #1c2541;
+      --accent: #48cae4;
+      --water: #3a506b;
+      --hit: #e63946;
+      --miss: #a8dadc;
+      --ship: #5bc0be;
+      --text: #ffffff;
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    h1 { margin-bottom: 5px; color: var(--accent); }
+    p { margin-top: 0; color: #b0c4de; font-size: 0.95rem; }
+    .status-bar {
+      font-weight: bold;
+      margin: 15px 0;
+      padding: 10px 20px;
+      border-radius: 8px;
+      background: var(--card-bg);
+      border: 1px solid var(--accent);
+      min-height: 24px;
+    }
+    .game-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      justify-content: center;
+    }
+    .board-card {
+      background: var(--card-bg);
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      text-align: center;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 28px repeat(10, 32px);
+      grid-template-rows: 28px repeat(10, 32px);
+      gap: 2px;
+      margin-top: 10px;
+    }
+    .cell {
+      background: var(--water);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      border-radius: 3px;
+      user-select: none;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .cell.header {
+      background: transparent;
+      font-weight: bold;
+      color: var(--accent);
+    }
+    .cell.clickable {
+      cursor: pointer;
+    }
+    .cell.clickable:hover {
+      background: #4f6d7a;
+      transform: scale(1.05);
+    }
+    .cell.ship { background: var(--ship); }
+    .cell.miss { background: var(--miss); color: #000; }
+    .cell.miss::after { content: "•"; font-size: 1.4rem; }
+    .cell.hit { background: var(--hit); color: #fff; animation: pulse 0.3s ease; }
+    .cell.hit::after { content: "✕"; font-weight: bold; }
+
+    @keyframes pulse {
+      0% { transform: scale(0.8); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    .btn {
+      background: var(--accent);
+      color: #03071e;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: #90e0ef; }
+  </style>
+</head>
+<body>
+
+  <h1>⚓ Hundir la Flota</h1>
+  <p>Haz clic en el radar enemigo para lanzar un ataque.</p>
+
+  <div class="status-bar" id="status">Tu turno: Selecciona una coordenada en el radar enemigo</div>
+
+  <div class="game-container">
+    <div class="board-card">
+      <h3>🛡️ Tu Flota</h3>
+      <div id="player-grid" class="grid"></div>
+    </div>
+
+    <div class="board-card">
+      <h3>🎯 Radar Enemigo (Ataca aquí)</h3>
+      <div id="enemy-grid" class="grid"></div>
+    </div>
+  </div>
+
+  <button class="btn" onclick="iniciarPartida()">Reiniciar Partida</button>
+
+  <script>
+    const SIZE = 10;
+    const SHIPS = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1]; // Tamaños de barcos estándar
+    const COLS = ["A","B","C","D","E","F","G","H","I","J"];
+
+    let playerBoard = [], enemyBoard = [];
+    let playerHits = 0, enemyHits = 0;
+    let totalTargetHits = SHIPS.reduce((a, b) => a + b, 0);
+    let gameOver = false;
+    let playerTurn = true;
+
+    function createEmptyBoard() {
+      return Array(SIZE).fill(null).map(() => Array(SIZE).fill(0));
+    }
+
+    function placeShipsRandomly(board) {
+      for (let len of SHIPS) {
+        let placed = false;
+        while (!placed) {
+          let dir = Math.random() < 0.5 ? 'H' : 'V';
+          let r = Math.floor(Math.random() * (dir === 'V' ? SIZE - len + 1 : SIZE));
+          let c = Math.floor(Math.random() * (dir === 'H' ? SIZE - len + 1 : SIZE));
+
+          let fits = true;
+          for (let i = 0; i < len; i++) {
+            let checkR = dir === 'V' ? r + i : r;
+            let checkC = dir === 'H' ? c + i : c;
+            if (board[checkR][checkC] !== 0) fits = false;
+          }
+
+          if (fits) {
+            for (let i = 0; i < len; i++) {
+              let fillR = dir === 'V' ? r + i : r;
+              let fillC = dir === 'H' ? c + i : c;
+              board[fillR][fillC] = 1; // 1 = Barco
+            }
+            placed = true;
+          }
+        }
+      }
+    }
+
+    function renderGrids() {
+      renderBoard('player-grid', playerBoard, false);
+      renderBoard('enemy-grid', enemyBoard, true);
+    }
+
+    function renderBoard(elementId, board, isEnemy) {
+      const container = document.getElementById(elementId);
+      container.innerHTML = '';
+
+      // Cabecera vacía (esquina)
+      container.appendChild(makeHeaderCell(''));
+      for (let c = 0; c < SIZE; c++) container.appendChild(makeHeaderCell(c + 1));
+
+      for (let r = 0; r < SIZE; r++) {
+        container.appendChild(makeHeaderCell(COLS[r]));
+        for (let c = 0; c < SIZE; c++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          const val = board[r][c];
+
+          if (!isEnemy && val === 1) cell.classList.add('ship');
+          if (val === 2) cell.classList.add('miss');
+          if (val === 3) cell.classList.add('hit');
+
+          if (isEnemy && val !== 2 && val !== 3) {
+            cell.classList.add('clickable');
+            cell.onclick = () => onPlayerAttack(r, c);
+          }
+          container.appendChild(cell);
+        }
+      }
+    }
+
+    function makeHeaderCell(text) {
+      const cell = document.createElement('div');
+      cell.className = 'cell header';
+      cell.innerText = text;
+      return cell;
+    }
+
+    function onPlayerAttack(r, c) {
+      if (gameOver || !playerTurn) return;
+      if (enemyBoard[r][c] === 2 || enemyBoard[r][c] === 3) return;
+
+      if (enemyBoard[r][c] === 1) {
+        enemyBoard[r][c] = 3; // Impacto
+        playerHits++;
+        document.getElementById('status').innerText = `💥 ¡Tocado en ${COLS[r]}${c + 1}! Tienes otro disparo.`;
+      } else {
+        enemyBoard[r][c] = 2; // Agua
+        document.getElementById('status').innerText = `🌊 Agua en ${COLS[r]}${c + 1}. Turno de la máquina...`;
+        playerTurn = false;
+        setTimeout(computerAttack, 700);
+      }
+
+      renderGrids();
+      checkWin();
+    }
+
+    function computerAttack() {
+      if (gameOver) return;
+      let valid = false;
+      let r, c;
+
+      while (!valid) {
+        r = Math.floor(Math.random() * SIZE);
+        c = Math.floor(Math.random() * SIZE);
+        if (playerBoard[r][c] !== 2 && playerBoard[r][c] !== 3) valid = true;
+      }
+
+      if (playerBoard[r][c] === 1) {
+        playerBoard[r][c] = 3;
+        enemyHits++;
+        document.getElementById('status').innerText = `🚨 La máquina acertó en ${COLS[r]}${c + 1} y vuelve a disparar.`;
+        renderGrids();
+        if (!checkWin()) setTimeout(computerAttack, 800);
+        return;
+      } else {
+        playerBoard[r][c] = 2;
+        document.getElementById('status').innerText = `💧 La máquina disparó al agua en ${COLS[r]}${c + 1}. Tu turno.`;
+        playerTurn = true;
+      }
+
+      renderGrids();
+      checkWin();
+    }
+
+    function checkWin() {
+      if (playerHits === totalTargetHits) {
+        document.getElementById('status').innerText = "🏆 ¡VICTORIA! Has hundido toda la flota enemiga.";
+        gameOver = true;
+        return true;
+      }
+      if (enemyHits === totalTargetHits) {
+        document.getElementById('status').innerText = "☠️ DERROTA. La flota enemiga ha destruido tus barcos.";
+        gameOver = true;
+        return true;
+      }
+      return false;
+    }
+
+    function iniciarPartida() {
+      playerBoard = createEmptyBoard();
+      enemyBoard = createEmptyBoard();
+      playerHits = 0;
+      enemyHits = 0;
+      gameOver = false;
+      playerTurn = true;
+      placeShipsRandomly(playerBoard);
+      placeShipsRandomly(enemyBoard);
+      renderGrids();
+      document.getElementById('status').innerText = "Tu turno: Selecciona una coordenada en el radar enemigo";
+    }
+
+    iniciarPartida();
+  </script>
+</body>
+</html>
