@@ -13,7 +13,7 @@ flota_rival = f.crear_flota()
 
 #Colocamos los barcos en los tableros
 t_barco_jugador = f.colocar_barcos(t_barco_jugador)
-t_barco_rival = f.colocar_barcos(t_barco_rival)
+t_disparos_jugador = f.colocar_barcos(t_disparos_jugador)
 
 #Mostramos el tablero del jugador
 
@@ -26,6 +26,20 @@ print("*********TABLERO DISPAROS JUGADOR***********")
 print("********************************************")
 print(t_disparos_jugador)
 
+#Colocamos los barcos en los tableros
+t_barco_rival = f.colocar_barcos(t_barco_rival )
+t_disparos_rival  = f.colocar_barcos(t_disparos_rival )
 
-print("Incio Juego"()) 
+#Mostramos el tablero del jugador
+
+print("********************************************")
+print("************TABLERO BARCO RIVAL***********")
+print("********************************************")
+print(t_barco_rival)
+print("********************************************")
+print("*********TABLERO DISPAROS RIVAL***********")
+print("********************************************")
+print(t_disparos_rival)
+
+print("Incio Juego") 
 print("Turno Juego: ",f.crear_turno()) 

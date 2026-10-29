@@ -59,7 +59,7 @@ def colocar_barcos(tablero):
 
     for eslora in esloras:
         barco = crear_barco(eslora)
-        colocar_barco(barco, tablero)  # singular: coloca 1 barco
+        colocar_barco(barco, tablero)  
     return tablero
 
 def crear_turno():
