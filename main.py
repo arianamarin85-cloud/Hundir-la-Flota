@@ -33,13 +33,13 @@ t_disparos_rival  = f.colocar_barcos(t_disparos_rival )
 #Mostramos el tablero del jugador
 
 print("********************************************")
-print("************TABLERO BARCO RIVAL***********")
+print("************TABLERO BARCO RIVAL*************")
 print("********************************************")
 print(t_barco_rival)
 print("********************************************")
-print("*********TABLERO DISPAROS RIVAL***********")
+print("*********TABLERO DISPAROS RIVAL*************")
 print("********************************************")
 print(t_disparos_rival)
 
 print("Incio Juego") 
-print("Turno Juego: ",f.crear_turno()) 
+print("Turno Juego: ",f.crear_turno(t_barco_rival,t_disparos_jugador,tiros_realizados,t_barco_jugador,t_disparos_rival)) 

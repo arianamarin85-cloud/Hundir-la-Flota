@@ -70,3 +70,47 @@ def crear_turno():
     else:
         return "Inicio Rival"
     
+    tiros_realizados = []
+def disparar(t_barco_rival,t_disparos_jugador,tiros_realizados):
+     
+    try:
+        fila = int(input("fila"))
+        columna = int(input("columna"))
+        
+        if (fila, columna) in tiros_realizados:
+            return "ya ha sido disparado"   
+        
+        elif  t_barco_rival[fila,columna] == "O":
+              t_disparos_jugador[fila,columna] = "X"
+              tiros_realizados.append((fila, columna))
+              return "Impacto"
+        
+        else:
+            t_disparos_jugador[fila,columna] = "A"
+            tiros_realizados.append((fila, columna))
+            return "Fallo"
+        
+    except:
+        print("valor invalido")
+        return "vuelva a introducir las coordenadas"
+
+def crear_turno(t_barco_rival,t_disparos_jugador,tiros_realizados,t_barco_jugador,t_disparos_rival):
+    turno_jugador = 0
+    d = np.random.randint(2)
+    while True:
+        if  turno_jugador == 0:
+            print ("Turno Jugador")
+            resultado = f.disparar(t_barco_rival,t_disparos_jugador,tiros_realizados)
+            if resultado == "Fallo":
+                turno_jugador = 1
+            print("Resultado: ", resultado)
+        else:
+            print ("Turno Rival")
+            resultado = disparar(t_barco_jugador,t_disparos_rival,tiros_realizados)
+            if resultado == "Fallo":
+                turno_jugador = 0
+            print("Resultado: ", resultado)
+
+print("Turnos Juego") 
+print("Turno Juego: ",crear_turno())
+        
