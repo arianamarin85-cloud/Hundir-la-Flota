@@ -55,6 +55,19 @@ En esta versión preliminar, si dos barcos coinciden en posición, se sobrescrib
 ### 3.4. Mecánica de Disparo del Jugador
 Obtiene fila y columna mediante `input()`. Incorpora un bloque `try / except` para capturar entradas inválidas del usuario sin interrumpir la ejecución. Controla los tiros previos mediante bloques `if / else` para evitar disparar a casillas repetidas y actualiza el tablero correspondiente.
 
+### 3.5. Mecánica de Disparo del Rival
+Genera coordenadas automáticas controladas mediante un bucle `while True` que valida que la casilla no haya sido atacada previamente, garantizando disparos únicos por parte de la IA.
+
+```python
+def disparar_rival(t_barco_jugador, t_disparos_rival, tiros_rival):
+    ...
+### 3.6. Sistema de Turnos
+El inicio de la partida se sortea aleatoriamente mediante `np.random.randint(2)`. Posteriormente, a través de un bucle se evalúa el resultado de cada ataque y se actualizan los tableros y listas de impacto en cada iteración.
+
+```python
+def crear_turno(t_barco_rival, t_disparos_jugador, tiros_realizados, t_barco_jugador, t_disparos_rival, tiros_rival):
+    d = np.random.randint(2)
+    ...
 ```python
 def disparar(t_barco_rival, t_disparos_jugador, tiros_realizados, tiros_rival):
     ...
