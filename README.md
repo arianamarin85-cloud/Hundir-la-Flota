@@ -61,13 +61,14 @@ Genera coordenadas automáticas controladas mediante un bucle `while True` que v
 ```python
 def disparar_rival(t_barco_jugador, t_disparos_rival, tiros_rival):
     ...
+
+    ...
+```python
 ### 3.6. Sistema de Turnos
 El inicio de la partida se sortea aleatoriamente mediante `np.random.randint(2)`. Posteriormente, a través de un bucle se evalúa el resultado de cada ataque y se actualizan los tableros y listas de impacto en cada iteración.
 
 ```python
 def crear_turno(t_barco_rival, t_disparos_jugador, tiros_realizados, t_barco_jugador, t_disparos_rival, tiros_rival):
     d = np.random.randint(2)
-    ...
-```python
 def disparar(t_barco_rival, t_disparos_jugador, tiros_realizados, tiros_rival):
     ...
